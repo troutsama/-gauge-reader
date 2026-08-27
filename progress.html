@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>揭榜挂帅 Track35 — 项目进度面板</title>
+<style>
+:root {
+  --bg: #080c12;
+  --panel: #0e1319;
+  --card: #11171f;
+  --border: #1a2230;
+  --text: #c8cdd4;
+  --dim: #6e7888;
+  --amber: #f0a030;
+  --amber-glow: rgba(240,160,48,0.15);
+  --green: #40a870;
+  --blue: #5090c0;
+  --red: #c05050;
+  --radius: 6px;
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body {
+  font-family: "Inter", "SF Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  background-image:
+    radial-gradient(ellipse at 30% 10%, rgba(240,160,48,0.04) 0%, transparent 60%),
+    radial-gradient(ellipse at 70% 80%, rgba(80,144,192,0.03) 0%, transparent 50%);
+}
+
+/* ── Top Bar ── */
+.topbar {
+  border-bottom: 1px solid var(--border);
+  background: rgba(14,19,25,0.8);
+  backdrop-filter: blur(12px);
+  padding: 0 32px; height: 56px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top:0; z-index:10;
+}
+.brand { font-weight:700; font-size:0.95rem; letter-spacing:0.03em; }
+.brand span { color: var(--amber); }
+.badge {
+  font-size:0.7rem; padding:4px 10px; border-radius:3px;
+  border:1px solid var(--amber-dim, #c07818); color:var(--amber);
+  background:rgba(240,160,48,0.08);
+}
+
+/* ── Layout ── */
+.container { max-width:1200px; margin:0 auto; padding:36px 24px; }
+
+/* ── Hero ── */
+.hero { text-align:center; margin-bottom:40px; }
+.hero h1 {
+  font-size:2.4rem; font-weight:700; letter-spacing:-0.02em;
+  background: linear-gradient(180deg, #e8e8ec 0%, #8890a0 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  margin-bottom:8px;
+}
+.hero p { color:var(--dim); font-size:1rem; }
+.hero .date { color:var(--dim); font-size:0.75rem; margin-top:4px; opacity:0.6; }
+
+/* ── Sections ── */
+.section { margin-bottom:44px; }
+.section-title {
+  font-size:0.7rem; letter-spacing:0.12em; text-transform:uppercase;
+  color: var(--dim); margin-bottom:16px;
+  display: flex; align-items: center; gap:8px;
+}
+.section-title::after {
+  content:''; flex:1; height:1px; background:var(--border);
+}
+
+/* ── Grid ── */
+.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.grid3 { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+.grid4 { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+@media (max-width:800px) { .grid2,.grid3,.grid4 { grid-template-columns:1fr; } }
+
+/* ── Cards ── */
+.card {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:var(--radius); padding:20px 22px;
+  position:relative; overflow:hidden;
+}
+.card::before {
+  content:''; position:absolute; top:0; left:8%; right:8%; height:1px;
+  background: linear-gradient(90deg, transparent, rgba(240,160,48,0.2), transparent);
+}
+.card.glow-amber { box-shadow: 0 0 30px var(--amber-glow); border-color: rgba(240,160,48,0.2); }
+.card.glow-green { box-shadow: 0 0 30px rgba(64,168,112,0.1); border-color: rgba(64,168,112,0.2); }
+
+.card-label {
+  font-size:0.65rem; letter-spacing:0.08em; text-transform:uppercase;
+  color:var(--dim); margin-bottom:8px;
+}
+.card-value {
+  font-family:"JetBrains Mono","Cascadia Code","Consolas",monospace;
+  font-size:2rem; font-weight:600; color:var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.card-value.amber { color:var(--amber); }
+.card-value.green { color:var(--green); }
+.card-value.blue { color:var(--blue); }
+.card-sub { font-size:0.75rem; color:var(--dim); margin-top:4px; }
+
+/* ── Metric Bar ── */
+.metric-bar {
+  display:flex; align-items:center; gap:10px; margin-top:6px;
+}
+.metric-bar .bar-track {
+  flex:1; height:6px; background:rgba(255,255,255,0.05); border-radius:3px; overflow:hidden;
+}
+.metric-bar .bar-fill {
+  height:100%; border-radius:3px; transition:width 1s ease;
+}
+.bar-fill.amber { background:var(--amber); }
+.bar-fill.green { background:var(--green); }
+.bar-fill.blue { background:var(--blue); }
+.metric-bar .bar-val {
+  font-family:"JetBrains Mono",monospace; font-size:0.8rem; color:var(--dim); min-width:42px; text-align:right;
+}
+
+/* ── Phase Timeline ── */
+.timeline { position:relative; padding-left:24px; }
+.timeline::before {
+  content:''; position:absolute; left:8px; top:4px; bottom:4px;
+  width:1px; background:var(--border);
+}
+.phase {
+  position:relative; padding:10px 0 10px 28px; margin-bottom:4px;
+}
+.phase::before {
+  content:''; position:absolute; left:-20px; top:16px;
+  width:10px; height:10px; border-radius:50%;
+  border:2px solid var(--border); background:var(--bg);
+}
+.phase.done::before { border-color:var(--green); background:var(--green); }
+.phase.active::before { border-color:var(--amber); background:var(--amber); box-shadow: 0 0 8px var(--amber); }
+.phase-title { font-weight:600; font-size:0.9rem; }
+.phase-desc { font-size:0.78rem; color:var(--dim); margin-top:2px; }
+.phase-tag {
+  display:inline-block; font-size:0.65rem; padding:2px 8px;
+  border-radius:3px; margin-top:4px;
+}
+.phase-tag.done { background:rgba(64,168,112,0.12); color:var(--green); }
+.phase-tag.active { background:rgba(240,160,48,0.12); color:var(--amber); }
+.phase-tag.todo { background:rgba(255,255,255,0.04); color:var(--dim); }
+
+/* ── File Tree ── */
+.file-tree { font-family:"JetBrains Mono",monospace; font-size:0.78rem; line-height:1.8; }
+.file-tree .dir { color:var(--blue); }
+.file-tree .file { color:var(--dim); }
+.file-tree .new { color:var(--green); }
+.file-tree .del { color:var(--red); text-decoration:line-through; }
+
+/* ── Pipeline Flow ── */
+.pipeline {
+  display:flex; align-items:center; gap:0; flex-wrap:wrap; justify-content:center;
+}
+.pipe-step {
+  padding:12px 18px; background:var(--card); border:1px solid var(--border);
+  text-align:center; font-size:0.8rem;
+}
+.pipe-step:first-child { border-radius:var(--radius) 0 0 var(--radius); }
+.pipe-step:last-child { border-radius:0 var(--radius) var(--radius) 0; }
+.pipe-arrow {
+  padding:0 6px; color:var(--amber); font-size:1.2rem; font-weight:bold;
+}
+.pipe-step .step-num { font-size:1.2rem; font-weight:700; color:var(--amber); }
+.pipe-step .step-name { font-size:0.7rem; color:var(--dim); margin-top:2px; }
+
+/* ── Stats Row ── */
+.stat-row { display:flex; gap:12px; flex-wrap:wrap; }
+.stat-chip {
+  padding:6px 14px; border-radius:20px; font-size:0.75rem;
+  border:1px solid var(--border); background:rgba(255,255,255,0.02);
+  display:flex; align-items:center; gap:6px;
+}
+.stat-chip .dot { width:6px; height:6px; border-radius:50%; }
+.dot.amber { background:var(--amber); }
+.dot.green { background:var(--green); }
+.dot.blue { background:var(--blue); }
+
+/* ── Footer ── */
+.footer {
+  border-top:1px solid var(--border); padding:20px; text-align:center;
+  font-size:0.7rem; color:var(--dim); opacity:0.5;
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">揭榜挂帅 <span>Track 35</span> · 指针式仪表自动读数</div>
+  <div class="badge">2026-08-03 进度面板</div>
+</div>
+
+<div class="container">
+
+<!-- Hero -->
+<div class="hero">
+  <h1>AI 仪表读数系统 V2</h1>
+  <p>双模型管线：YOLOv8检测 + YOLOv8-Pose关键点 + OCR回退</p>
+  <p class="date">发榜单位：北京普龙科技有限公司 · 硬件：RTX 5060 Laptop 8GB</p>
+</div>
+
+<!-- Pipeline -->
+<div class="section">
+  <div class="section-title">🔀 推理管线</div>
+  <div class="pipeline">
+    <div class="pipe-step"><div class="step-num">📸</div><div class="step-name">上传图片</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step"><div class="step-num">🔍</div><div class="step-name">表盘检测<br><small>YOLOv8n 0.992</small></div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step"><div class="step-num">📍</div><div class="step-name">关键点提取<br><small>YOLOv8-Pose 0.998</small></div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step"><div class="step-num">📐</div><div class="step-name">刻度定位<br><small>关键点优先/OCR回退</small></div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step"><div class="step-num">📊</div><div class="step-name">读数计算<br><small>角度插值+死区外推</small></div></div>
+  </div>
+</div>
+
+<!-- Model Performance -->
+<div class="section">
+  <div class="section-title">🎯 模型性能</div>
+  <div class="grid3">
+    <div class="card glow-green">
+      <div class="card-label">表盘检测 · YOLOv8n</div>
+      <div class="card-value green">0.992</div>
+      <div class="card-sub">mAP50 (4209张训练)</div>
+      <div class="metric-bar">
+        <span style="font-size:0.65rem;color:var(--dim)">mAP50-95</span>
+        <div class="bar-track"><div class="bar-fill green" style="width:85.6%"></div></div>
+        <span class="bar-val">0.856</span>
+      </div>
+    </div>
+    <div class="card glow-green">
+      <div class="card-label">关键点检测 · YOLOv8-Pose</div>
+      <div class="card-value green">0.998</div>
+      <div class="card-sub">Pose mAP50 (2216张训练)</div>
+      <div class="metric-bar">
+        <span style="font-size:0.65rem;color:var(--dim)">Pose mAP50-95</span>
+        <div class="bar-track"><div class="bar-fill green" style="width:99.8%"></div></div>
+        <span class="bar-val">0.998</span>
+      </div>
+    </div>
+    <div class="card glow-amber">
+      <div class="card-label">端到端推理</div>
+      <div class="card-value amber">~500ms</div>
+      <div class="card-sub">典型耗时 (检测+关键点+OCR)</div>
+      <div class="metric-bar">
+        <span style="font-size:0.65rem;color:var(--dim)">小图最快</span>
+        <div class="bar-track"><div class="bar-fill amber" style="width:8%"></div></div>
+        <span class="bar-val">26ms</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Progress Timeline -->
+<div class="section">
+  <div class="section-title">📋 项目进度</div>
+  <div class="grid2">
+    <div class="timeline">
+      <div class="phase done">
+        <div class="phase-title">基线搭建</div>
+        <div class="phase-desc">YOLOv8检测 + YOLOv8-Pose关键点 + EasyOCR + 7种预设量程</div>
+        <div class="phase-tag done">✅ 完成</div>
+      </div>
+      <div class="phase done">
+        <div class="phase-title">数据扩充</div>
+        <div class="phase-desc">下载Nanodet数据集 · 检测1836张 · 关键点2216张 · 3类2关键点标注</div>
+        <div class="phase-tag done">✅ 完成</div>
+      </div>
+      <div class="phase done">
+        <div class="phase-title">合并训练 V2</div>
+        <div class="phase-desc">检测4209张 mAP50 0.992 · 关键点2216张 Pose mAP50 0.998</div>
+        <div class="phase-tag done">✅ 完成 (本轮)</div>
+      </div>
+      <div class="phase done">
+        <div class="phase-title">代码优化</div>
+        <div class="phase-desc">清理死代码~1000行 · OCR RANSAC减60% · CV针尖精修 · 刻度自动定位</div>
+        <div class="phase-tag done">✅ 完成 (本轮)</div>
+      </div>
+      <div class="phase active">
+        <div class="phase-title">效果验证</div>
+        <div class="phase-desc">同分布OK · 高清实测指针OK · left_rect需增强 · OCR回退可用</div>
+        <div class="phase-tag active">🔄 当前</div>
+      </div>
+      <div class="phase">
+        <div class="phase-title">模型部署</div>
+        <div class="phase-desc">ONNX/TensorRT导出 · 推理加速3-5x · 9105张未标注图自动标注</div>
+        <div class="phase-tag todo">🔜 计划</div>
+      </div>
+    </div>
+
+    <!-- Stats & Files -->
+    <div>
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-label">📊 数据统计</div>
+        <div class="stat-row" style="margin-top:10px;">
+          <div class="stat-chip"><div class="dot amber"></div> 检测 4,209张</div>
+          <div class="stat-chip"><div class="dot green"></div> 关键点 2,216张</div>
+          <div class="stat-chip"><div class="dot blue"></div> 未标注 9,105张</div>
+          <div class="stat-chip"><div class="dot amber"></div> 预设量程 7种</div>
+          <div class="stat-chip"><div class="dot green"></div> 模型大小 12.7MB</div>
+          <div class="stat-chip"><div class="dot blue"></div> 3类关键点</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">📁 新增/变更文件</div>
+        <div class="file-tree" style="margin-top:8px;">
+          <div><span class="new">✦</span> <span class="dir">src/</span><span class="new">keypoint_reader_v2.py</span> <span style="color:var(--dim)">— 3类关键点+CV精修</span></div>
+          <div><span class="new">✦</span> <span class="dir">src/</span><span class="new">scale_from_keypoints.py</span> <span style="color:var(--dim)">— 关键点刻度定位</span></div>
+          <div><span class="new">✦</span> <span class="new">app_v2.py</span> <span style="color:var(--dim)">— 完整V2管线</span></div>
+          <div><span class="new">✦</span> <span class="dir">scripts/</span><span class="new">coco_to_yolo.py</span> <span style="color:var(--dim)">— COCO转换</span></div>
+          <div><span class="new">✦</span> <span class="dir">scripts/</span><span class="new">train_keypoint_v2.py</span> <span style="color:var(--dim)">— 关键点训练</span></div>
+          <div style="margin-top:8px;">&nbsp;</div>
+          <div><span class="del">✕</span> <span>segmentation.py</span> <span style="color:var(--dim)">— 移除~200行死代码</span></div>
+          <div><span class="del">→</span> <span class="dir">contrib/</span><span>digit_classifier.py</span> <span style="color:var(--dim)">— 354行从未调用</span></div>
+          <div><span class="del">→</span> <span class="dir">contrib/</span><span>adaptation.py</span> <span style="color:var(--dim)">— 346行从未调用</span></div>
+          <div style="margin-top:8px;">&nbsp;</div>
+          <div><span style="color:var(--dim)">✎</span> <span>scale_reader.py</span> <span style="color:var(--dim)">— RANSAC优化+共享OCR</span></div>
+          <div><span style="color:var(--dim)">✎</span> <span>scale_from_keypoints.py</span> <span style="color:var(--dim)">— 刻度定位模块</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Optimizations -->
+<div class="section">
+  <div class="section-title">⚡ 本轮优化 (9项)</div>
+  <div class="grid4">
+    <div class="card">
+      <div class="card-label">🧹 清理死代码</div>
+      <div class="card-value" style="font-size:1.5rem;">~1000行</div>
+      <div class="card-sub">4个未调用函数 + 2个模块移入contrib/</div>
+    </div>
+    <div class="card">
+      <div class="card-label">🎯 CV针尖精修</div>
+      <div class="card-value" style="font-size:1.5rem;">参考仓库</div>
+      <div class="card-sub">小图自动骨架化+霍夫线精修针尖</div>
+    </div>
+    <div class="card">
+      <div class="card-label">📐 刻度自动定位</div>
+      <div class="card-value" style="font-size:1.2rem;">无需OCR</div>
+      <div class="card-sub">关键点几何匹配7种预设量程</div>
+    </div>
+    <div class="card">
+      <div class="card-label">⚡ OCR加速</div>
+      <div class="card-value" style="font-size:1.5rem;">RANSAC 60%↓</div>
+      <div class="card-sub">5-ring→2-ring + 共享EasyOCR实例</div>
+    </div>
+  </div>
+</div>
+
+<!-- Current Status -->
+<div class="section">
+  <div class="section-title">🟢 当前状态</div>
+  <div class="grid2">
+    <div class="card glow-amber">
+      <div class="card-label">可用性</div>
+      <div class="card-value amber" style="font-size:1.4rem;">可演示</div>
+      <div class="card-sub">
+        ✅ 检测精准 (0.992)<br>
+        ✅ 关键点精准 (0.998)<br>
+        ⚠️ left_rect域外泛化待增强<br>
+        ✅ OCR回退可用
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-label">启动命令</div>
+      <div class="card-value" style="font-size:0.85rem;font-family:JetBrains Mono,monospace;color:var(--amber);">
+        python app_v2.py --port 8002
+      </div>
+      <div class="card-sub" style="margin-top:10px;">
+        浏览器访问 http://localhost:8002<br>
+        上传仪表照片 → 自动读数
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div class="footer">
+  揭榜挂帅 Track 35 · 指针式仪表自动读数 · 北京普龙科技有限公司
+</div>
+
+</body>
+</html>

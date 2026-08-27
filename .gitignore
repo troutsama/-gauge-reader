@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# 本地 skill 插件 (项目无关, 不应上传)
+.claude/
+.agents/
+
+# 模型权重 (大文件, 不放git, 用README说明下载)
+*.pt
+*.onnx
+*.pth
+*.ckpt
+
+# 数据 / 标注产物
+output/
+pointer_annotation/
+*.db
+*.sqlite
+
+# 测试/临时
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
+
+# 环境变量 (含API key)
+.env
+.env.local

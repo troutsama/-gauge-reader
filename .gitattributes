@@ -1,0 +1,18 @@
+# 统一换行符 (Windows 用 CRLF, git 存 LF)
+* text=auto
+
+# 文本文件
+*.py text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.yaml text eol=lf
+*.html text eol=lf
+*.txt text eol=lf
+*.css text eol=lf
+
+# 二进制文件
+*.pt binary
+*.onnx binary
+*.png binary
+*.jpg binary
+*.db binary
