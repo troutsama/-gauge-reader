@@ -10,11 +10,11 @@
 |:---:|:---:|
 | ![0-1.6](docs/demo_pressure_16mpa.jpg) | ![0-25](docs/demo_pressure_25.jpg) |
 
-| 真空表 (0~0.1) | 旋转表盘校正 |
-|:---:|:---:|
-| ![0.1](docs/demo_vacuum_01.jpg) | ![rotated](docs/demo_rotated_table.jpg) |
+| 真空表 (0~0.1) |
+|:---:|
+| ![0.1](docs/demo_vacuum_01.jpg) |
 
-自动识别量程 + 指针角度 + 读数，含旋转表盘校正。
+自动识别量程 + 指针角度 + 读数。
 
 ## 系统架构
 
